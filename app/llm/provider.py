@@ -1,13 +1,19 @@
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 
 from app.config.settings import settings
 
 
-def get_llm() -> ChatOllama:
-    """Create and return the configured chat model."""
+def get_llm() -> ChatOpenAI:
+    """Create and return the configured cloud chat model."""
 
-    return ChatOllama(
-        model=settings.ollama_model,
-        base_url=settings.ollama_base_url,
+    if not settings.openrouter_api_key:
+        raise ValueError(
+            "OPENROUTER_API_KEY is not configured."
+        )
+
+    return ChatOpenAI(
+        model=settings.openrouter_model,
+        api_key=settings.openrouter_api_key,
+        base_url=settings.openrouter_base_url,
         temperature=settings.llm_temperature,
     )
