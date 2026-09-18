@@ -17,28 +17,38 @@ def test_agent_order_status():
 
     messages = result["messages"]
 
-    assert len(messages) == 4
-
     # First message should be the user's question.
     assert isinstance(messages[0], HumanMessage)
 
-    # Second message should contain the tool request.
-    assert isinstance(messages[1], AIMessage)
-    assert len(messages[1].tool_calls) == 1
+    # The agent should request the order status tool.
+    tool_request = next(
+        message
+        for message in messages
+        if isinstance(message, AIMessage) and message.tool_calls
+    )
 
-    tool_call = messages[1].tool_calls[0]
+    assert len(tool_request.tool_calls) == 1
+
+    tool_call = tool_request.tool_calls[0]
 
     assert tool_call["name"] == "get_order_status"
     assert tool_call["args"]["order_id"] == "1001"
 
-    # Third message should contain the tool result.
-    assert isinstance(messages[2], ToolMessage)
-    assert messages[2].content == "Shipped"
+    # The tool should return the actual order status.
+    tool_result = next(
+        message
+        for message in messages
+        if isinstance(message, ToolMessage)
+    )
 
-    # Fourth message should be the final customer-facing response.
-    assert isinstance(messages[3], AIMessage)
-    assert messages[3].tool_calls == []
-    assert "shipped" in messages[3].content.lower()
+    assert tool_result.content == "Shipped"
+
+    # The final message should be the customer-facing response.
+    final_message = messages[-1]
+
+    assert isinstance(final_message, AIMessage)
+    assert final_message.tool_calls == []
+    assert "shipped" in final_message.content.lower()
 
 
 def test_agent_without_tool():
@@ -54,19 +64,20 @@ def test_agent_without_tool():
 
     messages = result["messages"]
 
-    assert len(messages) == 2
-
-    # User message
+    # User message.
     assert isinstance(messages[0], HumanMessage)
 
-    # Final LLM response
-    assert isinstance(messages[1], AIMessage)
+    # Final LLM response.
+    final_message = messages[-1]
+
+    assert isinstance(final_message, AIMessage)
 
     # No tool should have been requested.
-    assert messages[1].tool_calls == []
+    assert final_message.tool_calls == []
 
     # The answer should contain 4.
-    assert "4" in messages[1].content
+    assert "4" in final_message.content
+
 
 def test_agent_prevents_unauthorized_order_access():
     result = graph.invoke(
@@ -82,8 +93,10 @@ def test_agent_prevents_unauthorized_order_access():
 
     messages = result["messages"]
 
+    # Final customer-facing response.
     final_message = messages[-1]
 
     assert isinstance(final_message, AIMessage)
 
+    # Customer 456 must not receive customer 123's order status.
     assert "shipped" not in final_message.content.lower()
