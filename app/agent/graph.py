@@ -8,6 +8,7 @@ from typing_extensions import TypedDict
 
 from app.llm.provider import get_llm
 from app.tools.order import get_order_status
+from app.tools.customer import get_customer_info
 
 SYSTEM_PROMPT = """
 You are a customer support assistant.
@@ -33,7 +34,7 @@ class AgentState(TypedDict):
 llm = get_llm()
 
 llm_with_tools = llm.bind_tools(
-    [get_order_status]
+    [get_order_status,get_customer_info,]
 )
 
 
@@ -55,7 +56,7 @@ def should_continue(state:AgentState):
     return END
 
 tool_node = ToolNode(
-    [get_order_status]
+    [get_order_status,get_customer_info,]
 )
 
 
