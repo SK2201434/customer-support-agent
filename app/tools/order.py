@@ -29,3 +29,26 @@ def get_order_status(
         return "Order not found or you are not authorized to access this order."
 
     return order["status"]
+
+@tool
+def cancel_order(
+    order_id: str,
+    state: Annotated[dict, InjectedState],
+) -> str:
+    """Cancel a customer's order if it is eligible for cancellation."""
+
+    customer_id = state["user_id"]
+
+    order = order_service.cancel_customer_order(
+        order_id=order_id,
+        customer_id=customer_id,
+    )
+
+    if order is None:
+        return (
+            "The order could not be cancelled. "
+            "It may not exist, may not belong to you, "
+            "or may not be eligible for cancellation."
+        )
+
+    return f"Order {order['id']} has been cancelled successfully."
