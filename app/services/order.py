@@ -44,22 +44,6 @@ class OrderService:
 
         return "APPROVAL_REQUIRED"
     
-    def cancel_customer_order(
-    self,
-    order_id: str,
-    customer_id: str,
-) -> dict | None:
-        """Cancel an order only when policy allows it."""
-
-        decision = self.get_cancel_decision(
-            order_id=order_id,
-            customer_id=customer_id,
-        )
-
-        if decision != "ALLOW":
-            return None
-
-        return self.repository.cancel_order(order_id)
 
     def execute_cancel_order(
         self,

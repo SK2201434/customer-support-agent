@@ -9,7 +9,7 @@ from langgraph.prebuilt import ToolNode
 from typing_extensions import TypedDict
 
 from app.llm.provider import get_llm
-from app.tools.order import get_order_status,get_order_status,cancel_order
+from app.tools.order import get_order_status,cancel_order
 from app.tools.customer import get_customer_info
 
 SYSTEM_PROMPT = """

@@ -12,7 +12,12 @@ def test_agent_order_status():
                 )
             ],
             "user_id": "customer_123",
+        },
+        config={
+        "configurable": {
+            "thread_id": "test-agent-order-status"
         }
+    },
     )
 
     messages = result["messages"]
@@ -32,7 +37,7 @@ def test_agent_order_status():
     tool_call = tool_request.tool_calls[0]
 
     assert tool_call["name"] == "get_order_status"
-    assert tool_call["args"]["order_id"] == "1001"
+    assert str(tool_call["args"]["order_id"]) == "1001"
 
     # The tool should return the actual order status.
     tool_result = next(
@@ -59,7 +64,12 @@ def test_agent_without_tool():
                     content="What is 2 + 2?"
                 )
             ]
+        },
+        config={
+        "configurable": {
+            "thread_id": "test-agent-order-status"
         }
+    },
     )
 
     messages = result["messages"]
@@ -88,7 +98,12 @@ def test_agent_prevents_unauthorized_order_access():
                 )
             ],
             "user_id": "customer_456",
+        },
+        config={
+        "configurable": {
+            "thread_id": "test-agent-order-status"
         }
+    },
     )
 
     messages = result["messages"]
