@@ -24,19 +24,58 @@ class OrderService:
 
         return order
 
-    def cancel_customer_order(self,order_id: str, customer_id: str,) -> dict | None:
-        """Cancel an order if it belongs to the customer and is cancellable."""
+    def get_cancel_decision(
+        self,
+        order_id: str,
+        customer_id: str,
+    ) -> str:
+        """Return the cancellation policy decision."""
+
+        order = self.repository.get_order(order_id)
+
+        if order is None:
+            return "DENY"
+
+        if order["customer_id"] != customer_id:
+            return "DENY"
+
+        if order["status"] != "Processing":
+            return "DENY"
+
+        return "APPROVAL_REQUIRED"
+    
+    def cancel_customer_order(
+    self,
+    order_id: str,
+    customer_id: str,
+) -> dict | None:
+        """Cancel an order only when policy allows it."""
+
+        decision = self.get_cancel_decision(
+            order_id=order_id,
+            customer_id=customer_id,
+        )
+
+        if decision != "ALLOW":
+            return None
+
+        return self.repository.cancel_order(order_id)
+
+    def execute_cancel_order(
+        self,
+        order_id: str,
+        customer_id: str,
+    ) -> dict | None:
+        """Execute an order cancellation after approval."""
 
         order = self.repository.get_order(order_id)
 
         if order is None:
             return None
 
-        # Authorization check.
         if order["customer_id"] != customer_id:
             return None
 
-        # Only orders that are still being processed can be cancelled.
         if order["status"] != "Processing":
             return None
 
