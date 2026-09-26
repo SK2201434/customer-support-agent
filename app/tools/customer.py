@@ -17,7 +17,7 @@ def get_customer_info(
 ) -> str:
     """Get information about the currently authenticated customer."""
 
-    customer_id = state["user_id"]
+    customer_id = state["user"].user_id
 
     customer = customer_service.get_customer(customer_id)
 

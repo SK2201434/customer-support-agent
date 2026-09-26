@@ -18,7 +18,7 @@ def get_order_status(
 ) -> str:
     """Get the status of a customer's order."""
 
-    customer_id = state["user_id"]
+    customer_id = state["user"].user_id
 
     order = order_service.get_customer_order(
         order_id=order_id,
@@ -39,7 +39,7 @@ def cancel_order(
 ) -> str:
     """Request cancellation of a customer's order."""
 
-    customer_id = state["user_id"]
+    customer_id = state["user"].user_id
 
     decision = order_service.get_cancel_decision(
         order_id=order_id,

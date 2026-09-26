@@ -2,8 +2,9 @@ from typing import Annotated
 
 from langchain_core.messages import AnyMessage,SystemMessage
 from langgraph.graph import END, START, StateGraph
-from langgraph.types import interrupt
-from langgraph.checkpoint.memory import InMemorySaver
+from app.auth.models import AuthenticatedUser
+import sqlite3
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 from typing_extensions import TypedDict
@@ -44,7 +45,7 @@ Tool usage rules:
 
 class AgentState(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
-    user_id: str
+    user: AuthenticatedUser
 
 
 llm = get_llm()
@@ -91,7 +92,12 @@ builder.add_conditional_edges(
     },
 )
 builder.add_edge("tools", "llm")
-checkpointer = InMemorySaver()
+connection = sqlite3.connect(
+    "checkpoints.db",
+    check_same_thread=False,
+)
+
+checkpointer = SqliteSaver(connection)
 graph = builder.compile(
     checkpointer=checkpointer,
 )
