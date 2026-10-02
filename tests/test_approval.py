@@ -2,6 +2,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.types import Command
 
 from app.agent.graph import graph
+from app.auth.models import AuthenticatedUser
 from app.database.connection import get_connection
 from app.repositories.order import OrderRepository
 
@@ -23,7 +24,7 @@ def test_order_cancellation_approval():
 
     config = {
         "configurable": {
-            "thread_id": "test-order-cancellation-approval"
+            "thread_id": "test-order-cancellation-approval",
         }
     }
 
@@ -34,7 +35,10 @@ def test_order_cancellation_approval():
                     content="Please cancel my order 1002."
                 )
             ],
-            "user_id": "customer_123",
+            "user": AuthenticatedUser(
+                user_id="customer_123",
+                role="customer",
+            ),
         },
         config=config,
     )
@@ -76,7 +80,7 @@ def test_order_cancellation_declined():
 
     config = {
         "configurable": {
-            "thread_id": "test-order-cancellation-declined"
+            "thread_id": "test-order-cancellation-declined",
         }
     }
 
@@ -87,7 +91,10 @@ def test_order_cancellation_declined():
                     content="Please cancel my order 1002."
                 )
             ],
-            "user_id": "customer_123",
+            "user": AuthenticatedUser(
+                user_id="customer_123",
+                role="customer",
+            ),
         },
         config=config,
     )

@@ -5,7 +5,7 @@ from langgraph.prebuilt import InjectedState
 from langgraph.types import interrupt
 from app.repositories.order import OrderRepository
 from app.services.order import OrderService
-
+from app.auth.authorization import is_allowed
 
 repository = OrderRepository()
 order_service = OrderService(repository)
@@ -17,8 +17,13 @@ def get_order_status(
     state: Annotated[dict, InjectedState],
 ) -> str:
     """Get the status of a customer's order."""
+    user = state["user"]
 
-    customer_id = state["user"].user_id
+    if not is_allowed(user, "view_own_order"):
+        return "You are not authorized to access this order."
+
+
+    customer_id = user.user_id
 
     order = order_service.get_customer_order(
         order_id=order_id,
@@ -39,7 +44,12 @@ def cancel_order(
 ) -> str:
     """Request cancellation of a customer's order."""
 
-    customer_id = state["user"].user_id
+    user = state["user"]
+
+    if not is_allowed(user, "cancel_own_order"):
+        return "CANCELLATION_DENIED: You are not authorized to cancel this order."
+
+    customer_id = user.user_id
 
     decision = order_service.get_cancel_decision(
         order_id=order_id,

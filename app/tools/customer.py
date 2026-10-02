@@ -5,7 +5,7 @@ from langgraph.prebuilt import InjectedState
 
 from app.repositories.customer import CustomerRepository
 from app.services.customer import CustomerService
-
+from app.auth.authorization import is_allowed
 
 repository = CustomerRepository()
 customer_service = CustomerService(repository)
@@ -17,7 +17,10 @@ def get_customer_info(
 ) -> str:
     """Get information about the currently authenticated customer."""
 
-    customer_id = state["user"].user_id
+    user = state["user"]
+    if not is_allowed(user, "view_own_account"):
+        return "You are not authorized to access customer information."
+    customer_id = user.user_id
 
     customer = customer_service.get_customer(customer_id)
 

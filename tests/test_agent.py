@@ -1,6 +1,7 @@
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from app.agent.graph import graph
+from app.auth.models import AuthenticatedUser
 
 
 def test_agent_order_status():
@@ -11,13 +12,16 @@ def test_agent_order_status():
                     content="What is the status of my order 1001?"
                 )
             ],
-            "user_id": "customer_123",
+            "user": AuthenticatedUser(
+                user_id="customer_123",
+                role="customer",
+            ),
         },
         config={
-        "configurable": {
-            "thread_id": "test-agent-order-status"
-        }
-    },
+            "configurable": {
+                "thread_id": "test-agent-order-status",
+            }
+        },
     )
 
     messages = result["messages"]
@@ -63,13 +67,17 @@ def test_agent_without_tool():
                 HumanMessage(
                     content="What is 2 + 2?"
                 )
-            ]
+            ],
+            "user": AuthenticatedUser(
+                user_id="customer_123",
+                role="customer",
+            ),
         },
         config={
-        "configurable": {
-            "thread_id": "test-agent-order-status"
-        }
-    },
+            "configurable": {
+                "thread_id": "test-agent-without-tool",
+            }
+        },
     )
 
     messages = result["messages"]
@@ -97,13 +105,16 @@ def test_agent_prevents_unauthorized_order_access():
                     content="What is the status of my order 1001?"
                 )
             ],
-            "user_id": "customer_456",
+            "user": AuthenticatedUser(
+                user_id="customer_456",
+                role="customer",
+            ),
         },
         config={
-        "configurable": {
-            "thread_id": "test-agent-order-status"
-        }
-    },
+            "configurable": {
+                "thread_id": "test-agent-unauthorized-order",
+            }
+        },
     )
 
     messages = result["messages"]
