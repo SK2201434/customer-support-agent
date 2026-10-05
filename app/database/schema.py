@@ -7,6 +7,19 @@ def create_tables() -> None:
     connection = get_connection()
     cursor = connection.cursor()
 
+    # Create the users table
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+
     # Create the customers table
     cursor.execute(
         """

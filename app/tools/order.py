@@ -13,7 +13,7 @@ order_service = OrderService(repository)
 
 @tool
 def get_order_status(
-    order_id: str,
+    order_id: str | int,
     state: Annotated[dict, InjectedState],
 ) -> str:
     """Get the status of a customer's order."""
@@ -39,11 +39,11 @@ def get_order_status(
 
 @tool
 def cancel_order(
-    order_id: str,
+    order_id: str | int,
     state: Annotated[dict, InjectedState],
 ) -> str:
     """Request cancellation of a customer's order."""
-
+    order_id = str(order_id)
     user = state["user"]
 
     if not is_allowed(user, "cancel_own_order"):

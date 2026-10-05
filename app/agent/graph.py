@@ -73,7 +73,7 @@ def should_continue(state:AgentState):
     return END
 
 tool_node = ToolNode(
-    [get_order_status,get_customer_info,cancel_order,]
+    [get_order_status,get_customer_info,cancel_order,],handle_tool_errors=False
 )
 
 

@@ -26,6 +26,10 @@ class Settings:
     llm_temperature: float = float(
         os.getenv("LLM_TEMPERATURE", "0")
     )
+    jwt_secret_key: str = os.getenv(
+    "JWT_SECRET_KEY",
+    "",
+)
 
 
 settings = Settings()

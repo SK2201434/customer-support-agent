@@ -24,7 +24,7 @@ def test_order_cancellation_approval():
 
     config = {
         "configurable": {
-            "thread_id": "test-order-cancellation-approval",
+            "thread_id": "test-order-cancellation-approval-v3"
         }
     }
 
