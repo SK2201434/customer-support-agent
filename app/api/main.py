@@ -1,12 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,HTTPException,Depends   
 
 from app.agent.graph import graph
 from app.api.models import ChatRequest, ChatResponse
 from app.auth.models import AuthenticatedUser
 from langchain_core.messages import HumanMessage
-from app.api.models import (ChatRequest, ChatResponse,RegisterRequest)
+from app.api.models import (ChatRequest, ChatResponse,RegisterRequest,LoginRequest,AuthResponse,)
 from app.auth.service import AuthenticationService
 from app.repositories.user import UserRepository
+from app.auth.dependencies import get_current_user
+
 
 
 app = FastAPI(
@@ -46,21 +48,38 @@ def register(request: RegisterRequest):
             "error": str(error),
         }
 
+@app.post("/auth/login", response_model=AuthResponse)
+def login(request: LoginRequest):
+    token = auth_service.login_user(
+        email=request.email,
+        password=request.password,
+    )
+
+    if token is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password.",
+        )
+
+    return AuthResponse(
+        access_token=token,
+    )
+
 @app.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
+def chat(
+    request: ChatRequest,
+    current_user: AuthenticatedUser = Depends(get_current_user),
+):
     result = graph.invoke(
         {
             "messages": [
                 HumanMessage(content=request.message)
             ],
-            "user": AuthenticatedUser(
-                user_id=request.user_id,
-                role=request.role,
-            ),
+            "user": current_user,
         },
         config={
             "configurable": {
-                "thread_id": f"api-{request.user_id}",
+                "thread_id": f"api-{current_user.user_id}",
             }
         },
     )
