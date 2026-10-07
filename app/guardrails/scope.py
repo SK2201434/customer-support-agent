@@ -1,3 +1,9 @@
+from app.guardrails.result import (
+    GuardrailDecision,
+    GuardrailResult,
+)
+
+
 ORDER_KEYWORDS = {
     "order",
     "package",
@@ -30,8 +36,8 @@ SERVICE_KEYWORDS = {
 }
 
 
-def is_request_in_scope(message: str) -> bool:
-    normalized_message = message.lower()
+def is_request_in_scope(message: str) -> GuardrailResult:
+    normalized_message = message.lower().strip()
 
     keyword_groups = (
         ORDER_KEYWORDS,
@@ -40,8 +46,15 @@ def is_request_in_scope(message: str) -> bool:
         SERVICE_KEYWORDS,
     )
 
-    return any(
-        keyword in normalized_message
-        for group in keyword_groups
-        for keyword in group
+    for group in keyword_groups:
+        for keyword in group:
+            if keyword in normalized_message:
+                return GuardrailResult(
+                    decision=GuardrailDecision.ALLOW,
+                    reason="customer_support_request",
+                )
+
+    return GuardrailResult(
+        decision=GuardrailDecision.OUT_OF_SCOPE,
+        reason="unrelated_request",
     )
