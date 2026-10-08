@@ -63,21 +63,33 @@ def create_tables() -> None:
         )
         """
     )
-    # Create the full-text search index
 
+    # Create the full-text search index
     cursor.execute(
-    """
-    CREATE VIRTUAL TABLE IF NOT EXISTS knowledge_documents_fts
-    USING fts5(
-        title,
-        content,
-        category,
-        product,
-        content='knowledge_documents',
-        content_rowid='rowid'
+        """
+        CREATE VIRTUAL TABLE IF NOT EXISTS knowledge_documents_fts
+        USING fts5(
+            title,
+            content,
+            category,
+            product,
+            content='knowledge_documents',
+            content_rowid='rowid'
+        )
+        """
     )
-    """
-)
+
+    # Create the conversations table
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS conversations (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+        """
+    )
 
     # Commit changes and close the connection
     connection.commit()
